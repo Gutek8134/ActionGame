@@ -9,5 +9,13 @@ public class ActionGame : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "EnhancedInput" });
+
+		PublicIncludePaths.Add("ActionGame/");
+
+		PrivateDependencyModuleNames.AddRange(new string[] {
+			"GameplayAbilities",
+			"GameplayTags",
+			"GameplayTasks"
+		});
 	}
 }
