@@ -14,6 +14,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/AttributeSets/AG_AttributeSetBase.h"
 #include "AbilitySystem/Components/AG_AbilitySystemComponentBase.h"
+#include "DataAssets/CharacterDataAsset.h"
+
+#include "Net/UnrealNetwork.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -23,7 +26,7 @@ AActionGameCharacter::AActionGameCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -55,7 +58,7 @@ AActionGameCharacter::AActionGameCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-	
+
 	// Ability System
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAG_AbilitySystemComponentBase>(TEXT("AbilitySystemComponent"));
@@ -66,17 +69,26 @@ AActionGameCharacter::AActionGameCharacter()
 
 }
 
+void AActionGameCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (IsValid(CharacterDataAsset)) {
+		SetCharacterData(CharacterDataAsset->CharacterData);
+	}
+}
+
 bool AActionGameCharacter::ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext)
 {
 	if (!Effect.Get()) return false;
-	
+
 	FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(Effect, 1, InEffectContext);
 	if (SpecHandle.IsValid()) {
 		FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 
 		return ActiveGEHandle.WasSuccessfullyApplied();
 	}
-	
+
 	return false;
 }
 
@@ -84,20 +96,10 @@ UAbilitySystemComponent* AActionGameCharacter::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
-void AActionGameCharacter::InitializeAttributes()
-{
-	if (GetLocalRole() == ROLE_Authority && DefaultAttributeSet && AttributeSet) {
-		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
-		EffectContext.AddSourceObject(this);
-
-		ApplyGameplayEffectToSelf(DefaultAttributeSet, EffectContext);
-	}
-}
-
 void AActionGameCharacter::GiveAbilities()
 {
 	if (HasAuthority() && AbilitySystemComponent) {
-		for (auto DefaultAbility : DefaultAbilities) {
+		for (auto DefaultAbility : CharacterData.Abilities) {
 			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(DefaultAbility));
 		}
 	}
@@ -109,7 +111,7 @@ void AActionGameCharacter::ApplyStartupEffects()
 		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
 
-		for (auto CharacterEffect : DefaultEffects) {
+		for (auto CharacterEffect : CharacterData.Effects) {
 			ApplyGameplayEffectToSelf(CharacterEffect, EffectContext);
 		}
 
@@ -122,7 +124,6 @@ void AActionGameCharacter::PossessedBy(AController* NewController)
 
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 
-	InitializeAttributes();
 	GiveAbilities();
 	ApplyStartupEffects();
 }
@@ -132,7 +133,6 @@ void AActionGameCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
-	InitializeAttributes();
 }
 
 void AActionGameCharacter::BeginPlay()
@@ -150,6 +150,33 @@ void AActionGameCharacter::BeginPlay()
 	}
 }
 
+FCharacterData AActionGameCharacter::GetCharacterData() const
+{
+	return CharacterData;
+}
+
+void AActionGameCharacter::SetCharacterData(const FCharacterData& InCharacterData)
+{
+	CharacterData = InCharacterData;
+
+	InitFromCharacterData(InCharacterData);
+}
+
+void AActionGameCharacter::OnRep_CharacterData()
+{
+	InitFromCharacterData(CharacterData, true);
+}
+
+void AActionGameCharacter::InitFromCharacterData(const FCharacterData& InCharacterData, bool bFromReplication)
+{
+}
+
+void AActionGameCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AActionGameCharacter, CharacterData);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -157,7 +184,7 @@ void AActionGameCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -185,7 +212,7 @@ void AActionGameCharacter::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
+
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
