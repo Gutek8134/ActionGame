@@ -66,7 +66,7 @@ AActionGameCharacter::AActionGameCharacter()
 
 }
 
-bool AActionGameCharacter::ApplyGameplayEffectTiSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext)
+bool AActionGameCharacter::ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext)
 {
 	if (!Effect.Get()) return false;
 	
@@ -90,7 +90,7 @@ void AActionGameCharacter::InitializeAttributes()
 		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
 
-		ApplyGameplayEffectTiSelf(DefaultAttributeSet, EffectContext);
+		ApplyGameplayEffectToSelf(DefaultAttributeSet, EffectContext);
 	}
 }
 
@@ -105,12 +105,12 @@ void AActionGameCharacter::GiveAbilities()
 
 void AActionGameCharacter::ApplyStartupEffects()
 {
-	if (GetLocalRole() == ROLE_Authority && DefaultAttributeSet && AttributeSet) {
+	if (GetLocalRole() == ROLE_Authority) {
 		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
 
 		for (auto CharacterEffect : DefaultEffects) {
-			ApplyGameplayEffectTiSelf(CharacterEffect, EffectContext);
+			ApplyGameplayEffectToSelf(CharacterEffect, EffectContext);
 		}
 
 	}

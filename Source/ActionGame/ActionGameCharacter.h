@@ -47,7 +47,7 @@ class AActionGameCharacter : public ACharacter, public IAbilitySystemInterface
 public:
 	AActionGameCharacter();
 	
-	bool ApplyGameplayEffectTiSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext);
+	bool ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext);
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
