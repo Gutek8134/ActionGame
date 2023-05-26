@@ -46,7 +46,7 @@ class AActionGameCharacter : public ACharacter, public IAbilitySystemInterface
 		class UInputAction* LookAction;
 
 public:
-	AActionGameCharacter();
+	AActionGameCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual void PostInitializeComponents() override;
 
