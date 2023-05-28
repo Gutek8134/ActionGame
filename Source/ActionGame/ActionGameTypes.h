@@ -29,3 +29,9 @@ struct FCharacterAnimationData {
 	UPROPERTY(EditDefaultsOnly)
 		class UAnimSequenceBase* IdleAnimationSequence = nullptr;
 };
+
+UENUM(BlueprintType)
+enum class EFoot : uint8 {
+	Left UMETA(Displayname = "Left"),
+	Right UMETA(Displayname = "Right"),
+};

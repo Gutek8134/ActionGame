@@ -17,6 +17,8 @@
 #include "AbilitySystem/Components/AG_AbilitySystemComponentBase.h"
 #include "DataAssets/CharacterDataAsset.h"
 
+#include "ActorComponents/FootstepsComponent.h"
+
 #include "Net/UnrealNetwork.h"
 
 
@@ -69,6 +71,7 @@ AActionGameCharacter::AActionGameCharacter(const FObjectInitializer& ObjectIniti
 
 	AttributeSet = CreateDefaultSubobject<UAG_AttributeSetBase>(TEXT("AttributeSet"));
 
+	FootstepsComponent = CreateDefaultSubobject<UFootstepsComponent>(TEXT("Footsteps Component"));
 }
 
 void AActionGameCharacter::PostInitializeComponents()

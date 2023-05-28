@@ -96,6 +96,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetCharacterData(const FCharacterData& InCharacterData);
 
+
+	FORCEINLINE class UFootstepsComponent* GetFootstepsComponent() const { return FootstepsComponent; }
+
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_CharacterData)
 		FCharacterData CharacterData;
@@ -110,5 +113,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 		class UCharacterDataAsset* CharacterDataAsset;
 
+	UPROPERTY(BlueprintReadOnly)
+		class UFootstepsComponent* FootstepsComponent;
 };
 
