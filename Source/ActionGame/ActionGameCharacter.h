@@ -75,6 +75,12 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	/** Called for jumping input */
+	void JumpActionStarted(const FInputActionValue& Value);
+
+	void JumpActionStopped(const FInputActionValue& Value);
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 protected:
 	// APawn interface
@@ -115,5 +121,17 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 		class UFootstepsComponent* FootstepsComponent;
+
+
+// Gameplay Events
+protected:
+	UPROPERTY(EditDefaultsOnly)
+		FGameplayTag JumpEventTag;
+
+
+// Gameplay Tags
+protected:
+	UPROPERTY(EditDefaultsOnly)
+		FGameplayTagContainer InAirTags;
 };
 

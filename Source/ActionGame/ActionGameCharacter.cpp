@@ -191,8 +191,7 @@ void AActionGameCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 
 		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AActionGameCharacter::JumpActionStarted);
 
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AActionGameCharacter::Move);
@@ -237,6 +236,30 @@ void AActionGameCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AActionGameCharacter::JumpActionStarted(const FInputActionValue& Value)
+{
+	FGameplayEventData Payload;
+
+	Payload.Instigator = this;
+	Payload.EventTag = JumpEventTag;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, JumpEventTag, Payload);
+}
+
+void AActionGameCharacter::JumpActionStopped(const FInputActionValue& Value)
+{
+	//ACharacter::StopJumping();
+}
+
+void AActionGameCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	if (AbilitySystemComponent) {
+		AbilitySystemComponent->RemoveActiveEffectsWithTags(InAirTags);
 	}
 }
 
