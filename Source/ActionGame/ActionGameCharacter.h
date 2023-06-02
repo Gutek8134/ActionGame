@@ -37,6 +37,10 @@ class AActionGameCharacter : public ACharacter, public IAbilitySystemInterface
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* JumpAction;
 
+	/** Crouch Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* CrouchAction;
+
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* MoveAction;
@@ -81,6 +85,15 @@ protected:
 	void JumpActionStopped(const FInputActionValue& Value);
 
 	virtual void Landed(const FHitResult& Hit) override;
+
+	/** Called for crouch input */
+	void CrouchActionStarted(const FInputActionValue& Value);
+
+	void CrouchActionStopped(const FInputActionValue& Value);
+
+	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+
+	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 protected:
 	// APawn interface
@@ -133,5 +146,15 @@ protected:
 protected:
 	UPROPERTY(EditDefaultsOnly)
 		FGameplayTagContainer InAirTags;
+
+	UPROPERTY(EditDefaultsOnly)
+		FGameplayTagContainer CrouchTags;
+
+
+// Gameplay Effects
+protected:
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<UGameplayEffect> CrouchStateEffect;
+
 };
 
