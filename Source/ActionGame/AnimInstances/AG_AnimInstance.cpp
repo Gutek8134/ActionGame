@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "AnimInstances/AG_AnimInstance.h"
 #include "ActionGameCharacter.h"
 #include "ActionGameTypes.h"
 #include "DataAssets/CharacterAnimDataAsset.h"
-#include "AnimInstances/AG_AnimInstance.h"
 
 UBlendSpace* UAG_AnimInstance::GetLocomotionBlendspace() const
 {

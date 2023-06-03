@@ -73,6 +73,8 @@ AActionGameCharacter::AActionGameCharacter(const FObjectInitializer& ObjectIniti
 
 	AttributeSet = CreateDefaultSubobject<UAG_AttributeSetBase>(TEXT("AttributeSet"));
 
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetMaxMovementSpeedAttribute()).AddUObject(this, &AActionGameCharacter::OnMaxMovementSpeedChanged);
+
 	FootstepsComponent = CreateDefaultSubobject<UFootstepsComponent>(TEXT("Footsteps Component"));
 }
 
@@ -169,6 +171,11 @@ void AActionGameCharacter::SetCharacterData(const FCharacterData& InCharacterDat
 	InitFromCharacterData(InCharacterData);
 }
 
+void AActionGameCharacter::OnMaxMovementSpeedChanged(const FOnAttributeChangeData& Data)
+{
+	GetCharacterMovement()->MaxWalkSpeed = Data.NewValue;
+}
+
 void AActionGameCharacter::OnRep_CharacterData()
 {
 	InitFromCharacterData(CharacterData, true);
@@ -202,8 +209,13 @@ void AActionGameCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AActionGameCharacter::Look);
 
 		//Crouching
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AActionGameCharacter::CrouchActionStarted);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &AActionGameCharacter::CrouchActionStarted);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed , this, &AActionGameCharacter::CrouchActionStopped);
+
+		//Sprinting
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AActionGameCharacter::SprintActionStarted);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed , this, &AActionGameCharacter::SprintActionStopped);
+
 	}
 
 }
@@ -311,6 +323,19 @@ void AActionGameCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfH
 	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 }
 
+void AActionGameCharacter::SprintActionStarted(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent) {
+		AbilitySystemComponent->TryActivateAbilitiesByTag(SprintTags, true);
+	}
+}
+
+void AActionGameCharacter::SprintActionStopped(const FInputActionValue& Value)
+{
+	if (AbilitySystemComponent) {
+		AbilitySystemComponent->CancelAbilities(&SprintTags);
+	}
+}
 
 
 
