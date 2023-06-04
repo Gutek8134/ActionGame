@@ -18,6 +18,8 @@
 #include "DataAssets/CharacterDataAsset.h"
 
 #include "ActorComponents/FootstepsComponent.h"
+#include "ActorComponents/AG_CharacterMovementComponent.h"
+#include "ActorComponents/AG_MotionWarpingComponent.h"
 
 #include "Net/UnrealNetwork.h"
 
@@ -50,6 +52,8 @@ AActionGameCharacter::AActionGameCharacter(const FObjectInitializer& ObjectIniti
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 
+	AGCharacterMovementComponent = Cast<UAG_CharacterMovementComponent>(GetCharacterMovement());
+
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -76,6 +80,7 @@ AActionGameCharacter::AActionGameCharacter(const FObjectInitializer& ObjectIniti
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetMaxMovementSpeedAttribute()).AddUObject(this, &AActionGameCharacter::OnMaxMovementSpeedChanged);
 
 	FootstepsComponent = CreateDefaultSubobject<UFootstepsComponent>(TEXT("Footsteps Component"));
+	AGMotionWarpingComponent = CreateDefaultSubobject<UAG_MotionWarpingComponent>(TEXT("Motion Warping Component"));
 }
 
 void AActionGameCharacter::PostInitializeComponents()
@@ -258,12 +263,7 @@ void AActionGameCharacter::Look(const FInputActionValue& Value)
 
 void AActionGameCharacter::JumpActionStarted(const FInputActionValue& Value)
 {
-	FGameplayEventData Payload;
-
-	Payload.Instigator = this;
-	Payload.EventTag = JumpEventTag;
-
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, JumpEventTag, Payload);
+	AGCharacterMovementComponent->TryTraversal(AbilitySystemComponent);
 }
 
 void AActionGameCharacter::JumpActionStopped(const FInputActionValue& Value)

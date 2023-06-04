@@ -16,13 +16,16 @@ class UAG_AttributeSetBase;
 class UGameplayEffect;
 class UGameplayAbility;
 
+class UAG_MotionWarpingComponent;
+class UAG_CharacterMovementComponent;
+
 UCLASS(config = Game)
 class AActionGameCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
-		/** Camera boom positioning the camera behind the character */
-		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	/** Camera boom positioning the camera behind the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
@@ -62,6 +65,9 @@ public:
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	FORCEINLINE UAG_MotionWarpingComponent* GetAGMotionWarpingComponent() const { return AGMotionWarpingComponent; }
+
+
 protected:
 
 	void GiveAbilities();
@@ -76,6 +82,11 @@ protected:
 
 	UPROPERTY(Transient)
 		UAG_AttributeSetBase* AttributeSet;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MotionWarp")
+		UAG_MotionWarpingComponent* AGMotionWarpingComponent;
+
+	UAG_CharacterMovementComponent* AGCharacterMovementComponent;
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
