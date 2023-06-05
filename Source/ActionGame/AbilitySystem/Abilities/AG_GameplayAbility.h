@@ -24,7 +24,7 @@ protected:
 	TArray<FActiveGameplayEffectHandle> RemoveOnEndEffectHandles;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	class AActionGameCharacter* GetActionGameCharacterFromActionInfo() const;
+	class AActionGameCharacter* GetActionGameCharacterFromActorInfo() const;
 
 public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;

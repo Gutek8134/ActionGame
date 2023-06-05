@@ -6,7 +6,7 @@
 #include "AbilitySystemLog.h"
 #include "ActionGameCharacter.h"
 
-AActionGameCharacter* UAG_GameplayAbility::GetActionGameCharacterFromActionInfo() const
+AActionGameCharacter* UAG_GameplayAbility::GetActionGameCharacterFromActorInfo() const
 {
 
 	return Cast<AActionGameCharacter>(GetAvatarActorFromActorInfo());

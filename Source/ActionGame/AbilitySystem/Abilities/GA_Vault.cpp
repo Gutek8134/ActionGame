@@ -20,7 +20,7 @@ bool UGA_Vault::CommitCheck(const FGameplayAbilitySpecHandle Handle, const FGame
 {
 	if (!Super::CommitCheck(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags)) return false;
 
-	AActionGameCharacter* Character = CastChecked<AActionGameCharacter>(ActorInfo->AvatarActor.Get(), ECastCheckedType::NullAllowed);
+	AActionGameCharacter* Character = GetActionGameCharacterFromActorInfo();
 	if (!IsValid(Character)) return false;
 
 	const FVector StartLocation = Character->GetActorLocation();
@@ -99,8 +99,8 @@ bool UGA_Vault::CommitCheck(const FGameplayAbilitySpecHandle Handle, const FGame
 	if (!bJumpOverLocationSet) return false;
 
 	const FVector TraceStart = JumpOverLocation + ForwardVector * VerticalTraceStep;
-	const FVector TraceEnd = TraceStart + UpVector * VerticalTraceLength * -1;
-	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, TraceStart, TraceEnd, HorizontalTraceRadius, TraceObjectTypes, true, ActorsToIgnore, DebugDrawType, TraceHit, true)) {
+
+	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, TraceStart, JumpOverLocation, HorizontalTraceRadius, TraceObjectTypes, true, ActorsToIgnore, DebugDrawType, TraceHit, true)) {
 		JumpOverLocation = TraceHit.ImpactPoint;
 	}
 
@@ -115,8 +115,74 @@ bool UGA_Vault::CommitCheck(const FGameplayAbilitySpecHandle Handle, const FGame
 
 void UGA_Vault::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	if (!CommitAbility(Handle, ActorInfo, ActivationInfo)) {
+		K2_EndAbility();
+		return;
+	}
+
+	AActionGameCharacter* Character = GetActionGameCharacterFromActorInfo();
+
+	UCharacterMovementComponent* CharacterMovement = Character ? Character->GetCharacterMovement() : nullptr;
+	
+	if (CharacterMovement) {
+		CharacterMovement->SetMovementMode(MOVE_Flying);
+	}
+
+	UCapsuleComponent* CapsuleComponent = Character ? Character->GetCapsuleComponent() : nullptr;
+
+	if (CapsuleComponent) {
+		for (ECollisionChannel Channel : CollisionChannelsToIgnore) {
+			CapsuleComponent->SetCollisionResponseToChannel(Channel, ECollisionResponse::ECR_Ignore);
+		}
+	}
+	
+
+	UAG_MotionWarpingComponent* MotionWarpingComponent = Character ? Character->GetAGMotionWarpingComponent() : nullptr;
+
+	if (MotionWarpingComponent) {
+		MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("JumpToLocation"), JumpToLocation, Character->GetActorRotation());
+		MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("JumpOverLocation"), JumpOverLocation, Character->GetActorRotation());
+	}
+	
+	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, VaultMontage);
+
+	MontageTask->OnBlendOut.AddDynamic(this, &UGA_Vault::K2_EndAbility);
+	MontageTask->OnCompleted.AddDynamic(this, &UGA_Vault::K2_EndAbility);
+	MontageTask->OnInterrupted.AddDynamic(this, &UGA_Vault::K2_EndAbility);
+	MontageTask->OnCancelled.AddDynamic(this, &UGA_Vault::K2_EndAbility);
+	MontageTask->ReadyForActivation();
 }
 
 void UGA_Vault::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	if (IsValid(MontageTask)) {
+		MontageTask->EndTask();
+	}
+
+	AActionGameCharacter* Character = GetActionGameCharacterFromActorInfo();
+	
+	UCapsuleComponent* CapsuleComponent = Character ? Character->GetCapsuleComponent() : nullptr;
+	
+	if (CapsuleComponent) {
+		for (ECollisionChannel Channel : CollisionChannelsToIgnore) {
+			CapsuleComponent->SetCollisionResponseToChannel(Channel, ECollisionResponse::ECR_Block);
+		}
+	}
+
+	UCharacterMovementComponent* CharacterMovement = Character ? Character->GetCharacterMovement() : nullptr;
+	
+	if (CharacterMovement && CharacterMovement->IsFlying()) {
+		CharacterMovement->SetMovementMode(MOVE_Falling);
+	}
+
+	UAG_MotionWarpingComponent* MotionWarpingComponent = Character ? Character->GetAGMotionWarpingComponent() : nullptr;
+
+	if (MotionWarpingComponent) {
+		MotionWarpingComponent->RemoveWarpTarget(TEXT("JumpToLocation"));
+		MotionWarpingComponent->RemoveWarpTarget(TEXT("JumpOverLocation"));
+	}
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
