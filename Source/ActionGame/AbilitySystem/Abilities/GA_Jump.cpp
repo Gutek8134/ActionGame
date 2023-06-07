@@ -4,6 +4,8 @@
 #include "GA_Jump.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 UGA_Jump::UGA_Jump() {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
@@ -15,8 +17,13 @@ bool UGA_Jump::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
 		return false;
 
-	const ACharacter* Character = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get(), ECastCheckedType::NullAllowed);
-	return Character->CanJump();
+	ACharacter* Character = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get(), ECastCheckedType::NullAllowed);
+	const bool bMovementAllowsJump = Character->GetCharacterMovement()->IsJumpAllowed();
+
+	UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character);
+	const bool bIsWallrunning = AbilitySystemComponent && AbilitySystemComponent->HasMatchingGameplayTag(WallrunStateTag);
+
+	return Character->CanJump() || (bMovementAllowsJump && bIsWallrunning);
 }
 
 void UGA_Jump::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -31,6 +38,18 @@ void UGA_Jump::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FG
 		Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
 		ACharacter* Character = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
-		Character->Jump();
+
+		UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character);
+		if (AbilitySystemComponent->HasMatchingGameplayTag(WallrunStateTag)) {
+			FGameplayTagContainer WallrunTags(WallrunStateTag);
+
+			AbilitySystemComponent->CancelAbilities(&WallrunTags);
+
+			FVector JumpOffVector = Character->GetCharacterMovement()->GetCurrentAcceleration().GetSafeNormal() + FVector::UpVector;
+
+			Character->LaunchCharacter(JumpOffVector * OffWallJumpStrength, true, true);
+		}
+		else
+			Character->Jump();
 	}
 }
