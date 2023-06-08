@@ -41,3 +41,13 @@ enum class EFoot : uint8 {
 	Left UMETA(Displayname = "Left"),
 	Right UMETA(Displayname = "Right"),
 };
+
+UCLASS(BlueprintType, Blueprintable)
+class UStaticItemData : public UObject
+{
+	GENERATED_BODY()
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName Name;
+};
