@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class ACTIONGAME_API UInventoryItemInstance : public UObject
 {
 	GENERATED_BODY()
@@ -20,6 +20,9 @@ public:
 	virtual void Init(TSubclassOf<UStaticItemData> InItemDataClass);
 
 	FORCEINLINE virtual bool IsSupportedForNetworking() const override { return true; }
+
+	UFUNCTION(BlueprintCallable)
+	const UStaticItemData* GetItemStaticData() const;
 
 	UPROPERTY(Replicated)
 		TSubclassOf<UStaticItemData> StaticItemDataClass;

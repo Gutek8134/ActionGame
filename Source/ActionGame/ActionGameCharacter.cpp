@@ -20,6 +20,7 @@
 #include "ActorComponents/FootstepsComponent.h"
 #include "ActorComponents/AG_CharacterMovementComponent.h"
 #include "ActorComponents/AG_MotionWarpingComponent.h"
+#include "ActorComponents/InventoryComponent.h"
 
 #include "Net/UnrealNetwork.h"
 
@@ -80,7 +81,11 @@ AActionGameCharacter::AActionGameCharacter(const FObjectInitializer& ObjectIniti
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetMaxMovementSpeedAttribute()).AddUObject(this, &AActionGameCharacter::OnMaxMovementSpeedChanged);
 
 	FootstepsComponent = CreateDefaultSubobject<UFootstepsComponent>(TEXT("Footsteps Component"));
+	
 	AGMotionWarpingComponent = CreateDefaultSubobject<UAG_MotionWarpingComponent>(TEXT("Motion Warping Component"));
+	
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
+	InventoryComponent->SetIsReplicated(true);
 }
 
 void AActionGameCharacter::PostInitializeComponents()
@@ -194,6 +199,7 @@ void AActionGameCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AActionGameCharacter, CharacterData);
+	DOREPLIFETIME(AActionGameCharacter, InventoryComponent);
 }
 
 //////////////////////////////////////////////////////////////////////////

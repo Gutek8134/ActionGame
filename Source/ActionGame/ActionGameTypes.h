@@ -47,6 +47,9 @@ class UStaticItemData : public UObject
 {
 	GENERATED_BODY()
 
+public:
+	FORCEINLINE const FName& GetName() const { return Name; }
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName Name;

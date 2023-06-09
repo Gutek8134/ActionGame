@@ -2,11 +2,18 @@
 
 
 #include "Inventory/InventoryItemInstance.h"
+#include "ActionGameStatics.h"
 #include "Net/UnrealNetwork.h"
 
 void UInventoryItemInstance::Init(TSubclassOf<UStaticItemData> InItemDataClass) {
 	StaticItemDataClass = InItemDataClass;
 }
+
+const UStaticItemData* UInventoryItemInstance::GetItemStaticData() const
+{
+	return UActionGameStatics::GetItemStaticData(StaticItemDataClass);
+}
+
 void UInventoryItemInstance::OnRep_Equipped()
 {
 }

@@ -12,6 +12,7 @@
 
 class UAG_AbilitySystemComponentBase;
 class UAG_AttributeSetBase;
+class UInventoryComponent;
 
 class UGameplayEffect;
 class UGameplayAbility;
@@ -129,7 +130,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 public:
-	UFUNCTION(BLueprintCallable)
+	UFUNCTION(BlueprintCallable)
 		FCharacterData GetCharacterData() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -157,6 +158,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		class UFootstepsComponent* FootstepsComponent;
 
+	UPROPERTY(EditAnywhere, Replicated)
+		class UInventoryComponent* InventoryComponent;
 
 // Gameplay Events
 protected:

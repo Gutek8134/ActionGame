@@ -28,11 +28,11 @@ struct FInventoryList : public FFastArraySerializer
 		return FFastArraySerializer::FastArrayDeltaSerialize<FInventoryListItem, FInventoryList>(Items, DeltaParams, *this);
 	}
 
-	void AddItem(TSubclassOf<UStaticItemData> InItemStaticDataClass);
+	void AddItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
 
-	void RemoveItem(TSubclassOf<UStaticItemData> InItemStaticDataClass);
+	void RemoveItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
 
-	TArray<FInventoryListItem>& GetItemsRef() { return Items; }
+	FORCEINLINE TArray<FInventoryListItem>& GetItemsRef() { return Items; }
 
 
 protected:
