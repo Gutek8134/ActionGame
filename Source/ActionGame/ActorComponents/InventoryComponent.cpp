@@ -56,6 +56,42 @@ bool UInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch*
 	return WroteSomething;
 }
 
+void UInventoryComponent::AddItem(TSubclassOf<UStaticItemData> InItemStaticDataClass)
+{
+	InventoryList.AddItem(InItemStaticDataClass);
+
+}
+
+void UInventoryComponent::RemoveItem(TSubclassOf<UStaticItemData> InItemStaticDataClass)
+{
+	InventoryList.RemoveItem(InItemStaticDataClass);
+}
+
+void UInventoryComponent::EquipItem(TSubclassOf<UStaticItemData> InStaticItemDataClass)
+{
+	if (GetOwner()->HasAuthority()) {
+		for (const auto& Item : InventoryList.GetItemsRef()) {
+			Item.ItemInstance->OnEquipped();
+
+			CurrentItem = Item.ItemInstance;
+
+			break;
+		}
+	}
+}
+
+void UInventoryComponent::UnequipItem(TSubclassOf<UStaticItemData> InStaticItemDataClass)
+{
+	if (GetOwner()->HasAuthority()) {
+		for (const auto& Item : InventoryList.GetItemsRef()) {
+			Item.ItemInstance->OnUnequipped();
+
+			CurrentItem = nullptr;
+
+			break;
+		}
+	}
+}
 
 // Called every frame
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -69,7 +105,7 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 			const UStaticItemData* ItemStaticData = ItemInstance->GetItemStaticData();
 
 			if (IsValid(ItemInstance) && IsValid(ItemStaticData)) {
-				GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Blue, FString::Printf(TEXT("%s"), *ItemStaticData->GetName().ToString()));
+				GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Blue, FString::Printf(TEXT("%s"), *ItemStaticData->Name.ToString()));
 
 			}
 		}
@@ -80,4 +116,5 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UInventoryComponent, InventoryList);
+	DOREPLIFETIME(UInventoryComponent, CurrentItem);
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "ActionGameTypes.h"
+#include "Actors/ItemActor.h"
 #include "InventoryItemInstance.generated.h"
 
 /**
@@ -33,10 +34,14 @@ public:
 	UFUNCTION()
 		void OnRep_Equipped();
 
-	FORCEINLINE virtual void OnEquipped() {}
+	virtual void OnEquipped(AActor* InOwner = nullptr);
 
-	FORCEINLINE virtual void OnUnequipped() {}
+	virtual void OnUnequipped();
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+protected:
+	UPROPERTY(Replicated)
+		AItemActor* ItemActor = nullptr;
 };
 

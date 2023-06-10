@@ -28,7 +28,7 @@ struct FCharacterAnimationData {
 
 	UPROPERTY(EditDefaultsOnly)
 		class UAnimSequenceBase* IdleAnimationSequence = nullptr;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 		class UBlendSpace* CrouchMovementBlendspace = nullptr;
 
@@ -48,9 +48,13 @@ class UStaticItemData : public UObject
 	GENERATED_BODY()
 
 public:
-	FORCEINLINE const FName& GetName() const { return Name; }
 
-protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FName Name;
+		FName Name;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		TSubclassOf<AItemActor> ItemActorClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		FName AttachmentSocket = NAME_None;
 };

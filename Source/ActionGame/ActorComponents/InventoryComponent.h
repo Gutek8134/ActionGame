@@ -8,12 +8,13 @@
 #include "InventoryComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ACTIONGAME_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UInventoryComponent();
 
@@ -21,17 +22,35 @@ public:
 
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
+	UFUNCTION(BlueprintCallable)
+		void AddItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
+
+	UFUNCTION(BlueprintCallable)
+		void RemoveItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
+
+	UFUNCTION(BlueprintCallable)
+		void EquipItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
+	
+	UFUNCTION(BlueprintCallable)
+		void UnequipItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		FORCEINLINE UInventoryItemInstance* GetEquippedItem() const { return CurrentItem; }
+
 protected:
 	UPROPERTY(Replicated)
 		FInventoryList InventoryList;
 
-public:	
+	UPROPERTY(EditDefaultsOnly)
+		TArray<TSubclassOf<UStaticItemData>> DefaultItems;
+
+	UPROPERTY(Replicated)
+		UInventoryItemInstance* CurrentItem = nullptr;
+
+public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-protected:
-	UPROPERTY(EditDefaultsOnly)
-		TArray<TSubclassOf<UStaticItemData>> DefaultItems;
 };
