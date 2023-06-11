@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "ActionGameTypes.generated.h"
 
+class AItemActor;
+
 USTRUCT(BlueprintType)
 struct FCharacterData {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS")
+		UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS")
 		TArray<TSubclassOf<class UGameplayEffect>> Effects;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS")
@@ -23,7 +25,7 @@ USTRUCT(BlueprintType)
 struct FCharacterAnimationData {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditDefaultsOnly)
+		UPROPERTY(EditDefaultsOnly)
 		class UBlendSpace* MovementBlendspace = nullptr;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -57,4 +59,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		FName AttachmentSocket = NAME_None;
+};
+
+UENUM(BlueprintType)
+enum EItemState {
+	None UMETA(Displayname = "None"),
+	Equipped UMETA(Displayname = "Equipped"),
+	Dropped UMETA(Displayname = "Dropped")
 };

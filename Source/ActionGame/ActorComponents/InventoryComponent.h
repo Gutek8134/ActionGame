@@ -32,7 +32,10 @@ public:
 		void EquipItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
 	
 	UFUNCTION(BlueprintCallable)
-		void UnequipItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
+		void UnequipItem();
+
+	UFUNCTION(BlueprintCallable)
+		void DropItem();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FORCEINLINE UInventoryItemInstance* GetEquippedItem() const { return CurrentItem; }

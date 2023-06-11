@@ -49,7 +49,7 @@ bool UInventoryComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch*
 		UInventoryItemInstance* ItemInstance = Item.ItemInstance;
 
 		if (IsValid(ItemInstance)) {
-			WroteSomething = Channel->ReplicateSubobject(ItemInstance, *Bunch, *RepFlags);
+			WroteSomething |= Channel->ReplicateSubobject(ItemInstance, *Bunch, *RepFlags);
 		}
 	}
 
@@ -70,25 +70,42 @@ void UInventoryComponent::RemoveItem(TSubclassOf<UStaticItemData> InItemStaticDa
 void UInventoryComponent::EquipItem(TSubclassOf<UStaticItemData> InStaticItemDataClass)
 {
 	if (GetOwner()->HasAuthority()) {
+		//UE_LOG(LogTemp, Warning, TEXT("Loking for item class"));
+
 		for (const auto& Item : InventoryList.GetItemsRef()) {
-			Item.ItemInstance->OnEquipped();
+			if (Item.ItemInstance->StaticItemDataClass == InStaticItemDataClass) {
+				//UE_LOG(LogTemp, Warning, TEXT("Found!"));
+				Item.ItemInstance->OnEquipped(GetOwner());
 
-			CurrentItem = Item.ItemInstance;
+				CurrentItem = Item.ItemInstance;
 
-			break;
+				break;
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No authority for equipping"))
+	}
+}
+
+void UInventoryComponent::UnequipItem()
+{
+	if (GetOwner()->HasAuthority()) {
+		if (IsValid(CurrentItem)) {
+			CurrentItem->OnUnequipped();
+			CurrentItem = nullptr;
 		}
 	}
 }
 
-void UInventoryComponent::UnequipItem(TSubclassOf<UStaticItemData> InStaticItemDataClass)
+void UInventoryComponent::DropItem()
 {
 	if (GetOwner()->HasAuthority()) {
-		for (const auto& Item : InventoryList.GetItemsRef()) {
-			Item.ItemInstance->OnUnequipped();
-
+		if (IsValid(CurrentItem)) {
+			CurrentItem->OnDropped();
+			RemoveItem(CurrentItem->StaticItemDataClass);
 			CurrentItem = nullptr;
-
-			break;
 		}
 	}
 }

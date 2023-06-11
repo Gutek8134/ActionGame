@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/SphereComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "ActionGameTypes.h"
 #include "ItemActor.generated.h"
 
 class UInventoryItemInstance;
@@ -40,4 +43,16 @@ public:
 protected:
 	UPROPERTY(Replicated)
 		UInventoryItemInstance* ItemInstance = nullptr;
+	
+	UPROPERTY(Replicated)
+		TEnumAsByte<EItemState> ItemState = EItemState::None;
+
+	UPROPERTY()
+		USphereComponent* SphereComponent = nullptr;
+
+	UFUNCTION()
+		void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SpeepResult);
+
+
+	FGameplayTag OverlapEventTag;
 };

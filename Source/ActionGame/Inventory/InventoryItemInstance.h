@@ -38,6 +38,8 @@ public:
 
 	virtual void OnUnequipped();
 
+	virtual void OnDropped();
+
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
 protected:
