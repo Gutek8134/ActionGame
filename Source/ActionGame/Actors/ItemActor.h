@@ -55,4 +55,7 @@ protected:
 
 
 	FGameplayTag OverlapEventTag;
+
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<UStaticItemData> StaticItemDataClass;
 };

@@ -28,6 +28,7 @@ void UInventoryItemInstance::OnEquipped(AActor* InOwner)
 
 		ItemActor = World->SpawnActorDeferred<AItemActor>(GetItemStaticData()->ItemActorClass, Transform, InOwner);
 		ItemActor->Init(this);
+		ItemActor->OnEquipped();
 		ItemActor->FinishSpawning(Transform);
 		ACharacter* Character = Cast<ACharacter>(InOwner);
 		USkeletalMeshComponent* SkeletalMesh = Character ? Character->GetMesh() : nullptr;
@@ -43,6 +44,8 @@ void UInventoryItemInstance::OnEquipped(AActor* InOwner)
 		//UE_LOG(LogTemp, Warning, L"WTH? No world!");
 
 	}
+
+	bEquiped = true;
 }
 
 void UInventoryItemInstance::OnUnequipped()
@@ -51,6 +54,8 @@ void UInventoryItemInstance::OnUnequipped()
 		ItemActor->Destroy();
 		ItemActor = nullptr;
 	}
+
+	bEquipped = false;
 }
 
 void UInventoryItemInstance::OnDropped()

@@ -29,6 +29,8 @@ struct FInventoryList : public FFastArraySerializer
 	}
 
 	void AddItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
+	void AddItem(UInventoryItemInstance* InItemInstance);
+
 
 	void RemoveItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
 

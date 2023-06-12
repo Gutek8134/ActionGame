@@ -7,7 +7,11 @@
 #include "Inventory/InventoryList.h"
 #include "InventoryComponent.generated.h"
 
-
+#include "Abilities/GameplayAbilityTypes.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "Actors/ItemActor.h"
+#include "GameplayTagsManager.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ACTIONGAME_API UInventoryComponent : public UActorComponent
@@ -24,6 +28,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void AddItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
+	
+	UFUNCTION(BlueprintCallable)
+		void AddItemInstance(UInventoryItemInstance* InItemInstance);
 
 	UFUNCTION(BlueprintCallable)
 		void RemoveItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
@@ -32,10 +39,23 @@ public:
 		void EquipItem(TSubclassOf<UStaticItemData> InStaticItemDataClass);
 	
 	UFUNCTION(BlueprintCallable)
+		void EquipItemInstance(UInventoryItemInstance* InItemInstance);
+	
+	UFUNCTION(BlueprintCallable)
 		void UnequipItem();
 
 	UFUNCTION(BlueprintCallable)
 		void DropItem();
+
+	UFUNCTION(BlueprintCallable)
+		void EquipNextItem();
+
+	virtual void GameplayEventCallback(const FGameplayEventData* Payload);
+
+	static FGameplayTag EquipItemActorTag;
+	static FGameplayTag DropItemTag;
+	static FGameplayTag EquipNextTag;
+	static FGameplayTag UnequipTag;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FORCEINLINE UInventoryItemInstance* GetEquippedItem() const { return CurrentItem; }
@@ -49,6 +69,16 @@ protected:
 
 	UPROPERTY(Replicated)
 		UInventoryItemInstance* CurrentItem = nullptr;
+
+	UFUNCTION()
+		void AddInventoryTags();
+
+	FDelegateHandle TagDelegateHandle;
+
+	void HandleGameplayEventInternal(FGameplayEventData Payload);
+
+	UFUNCTION(Server, Reliable)
+		void ServerHandleGameplayEvent(FGameplayEventData Payload);
 
 public:
 	// Called every frame

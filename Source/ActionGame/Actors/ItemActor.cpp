@@ -12,9 +12,10 @@
 // Sets default values
 AItemActor::AItemActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+	SetReplicatedMovement(true);
 
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
 	SphereComponent->SetupAttachment(RootComponent);
@@ -38,7 +39,16 @@ void AItemActor::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 void AItemActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (HasAuthority()) {
+		if (!IsValid(ItemInstance) && IsValid(StaticItemDataClass)) {
+			ItemInstance = NewObject<UInventoryItemInstance>();
+			ItemInstance->Init(StaticItemDataClass);
+		}
+	}
+
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SphereComponent->SetGenerateOverlapEvents(true);
 }
 
 // Called every frame
@@ -53,6 +63,7 @@ void AItemActor::OnEquipped()
 	ItemState = EItemState::Equipped;
 
 	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SphereComponent->SetGenerateOverlapEvents(false);
 }
 
 void AItemActor::OnUnequipped()
@@ -60,15 +71,15 @@ void AItemActor::OnUnequipped()
 	ItemState = EItemState::None;
 
 	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SphereComponent->SetGenerateOverlapEvents(false);
 }
 
 void AItemActor::OnDropped()
 {
 	GetRootComponent()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	
+
 	ItemState = EItemState::Dropped;
 
-	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	if (AActor* ActorOwner = GetOwner()) {
 		const FVector Location = GetActorLocation();
@@ -89,12 +100,18 @@ void AItemActor::OnDropped()
 
 		EDrawDebugTrace::Type DebugDrawType = bShowInventoryDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
 
+		FVector TargetLocation = TraceEnd;
+
 		if (UKismetSystemLibrary::LineTraceSingleByProfile(this, TraceStart, TraceEnd, TEXT("worldStatic"), true, ActorsToIgnore, DebugDrawType, TraceHit, true)) {
 			if (TraceHit.bBlockingHit) {
-				SetActorLocation(TraceHit.Location);
-				return;
+				TargetLocation = TraceHit.Location;
 			}
 		}
+
+		SetActorLocation(TargetLocation);
+
+		SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		SphereComponent->SetGenerateOverlapEvents(true);
 	}
 }
 

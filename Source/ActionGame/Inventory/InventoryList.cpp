@@ -15,6 +15,14 @@ void FInventoryList::AddItem(TSubclassOf<UStaticItemData> InItemStaticDataClass)
 
 }
 
+void FInventoryList::AddItem(UInventoryItemInstance* InItemInstance)
+{
+	FInventoryListItem& Item = Items.AddDefaulted_GetRef();
+	Item.ItemInstance = InItemInstance;
+	MarkItemDirty(Item);
+
+}
+
 void FInventoryList::RemoveItem(TSubclassOf<UStaticItemData> InItemStaticDataClass)
 {
 	for (auto ItemIter = Items.CreateIterator(); ItemIter; ++ItemIter)
