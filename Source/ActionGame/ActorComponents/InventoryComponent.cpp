@@ -33,9 +33,11 @@ UInventoryComponent::UInventoryComponent()
 	bWantsInitializeComponent = true;
 	SetIsReplicatedByDefault(true);
 
-	// ...
-
-	UGameplayTagsManager().Get().OnLastChanceToAddNativeTags().AddUObject(this, &UInventoryComponent::AddInventoryTags);
+	static bool bHandledAddingTags = false;
+	if (!bHandledAddingTags) {
+		UGameplayTagsManager::Get().OnLastChanceToAddNativeTags().AddUObject(this, &UInventoryComponent::AddInventoryTags);
+		bHandledAddingTags = true;
+	}
 }
 
 
@@ -47,8 +49,11 @@ void UInventoryComponent::InitializeComponent()
 		InventoryList.AddItem(ItemClass);
 	}
 
-	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner()) {
-
+	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner())) {
+		ASC->GenericGameplayEventCallbacks.FindOrAdd(UInventoryComponent::EquipItemActorTag).AddUObject(this, &UInventoryComponent::GameplayEventCallback);
+		ASC->GenericGameplayEventCallbacks.FindOrAdd(UInventoryComponent::DropItemTag).AddUObject(this, &UInventoryComponent::GameplayEventCallback);
+		ASC->GenericGameplayEventCallbacks.FindOrAdd(UInventoryComponent::EquipNextTag).AddUObject(this, &UInventoryComponent::GameplayEventCallback);
+		ASC->GenericGameplayEventCallbacks.FindOrAdd(UInventoryComponent::UnequipTag).AddUObject(this, &UInventoryComponent::GameplayEventCallback);
 	}
 }
 

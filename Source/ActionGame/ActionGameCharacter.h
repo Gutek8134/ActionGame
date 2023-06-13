@@ -56,6 +56,16 @@ class AActionGameCharacter : public ACharacter, public IAbilitySystemInterface
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* LookAction;
+	
+	//Inventory
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* DropItemAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* EquipNextAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* UnequipAction;
 
 public:
 	AActionGameCharacter(const FObjectInitializer& ObjectInitializer);
@@ -111,10 +121,18 @@ protected:
 
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
-	/** Called for crouch input */
+	/** Called for sprint input */
 	void SprintActionStarted(const FInputActionValue& Value);
 
 	void SprintActionStopped(const FInputActionValue& Value);
+
+	/** Called for inventory related input*/
+
+	void DropItem(const FInputActionValue& Value);
+
+	void EquipNextItem(const FInputActionValue& Value);
+	
+	void UnequipItem(const FInputActionValue& Value);
 
 protected:
 	// APawn interface

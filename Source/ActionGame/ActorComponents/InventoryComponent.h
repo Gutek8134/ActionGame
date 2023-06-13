@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Inventory/InventoryList.h"
-#include "InventoryComponent.generated.h"
 
 #include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Actors/ItemActor.h"
 #include "GameplayTagsManager.h"
+
+#include "InventoryComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ACTIONGAME_API UInventoryComponent : public UActorComponent
@@ -72,8 +73,6 @@ protected:
 
 	UFUNCTION()
 		void AddInventoryTags();
-
-	FDelegateHandle TagDelegateHandle;
 
 	void HandleGameplayEventInternal(FGameplayEventData Payload);
 

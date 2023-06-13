@@ -44,17 +44,18 @@ protected:
 	UPROPERTY(Replicated)
 		UInventoryItemInstance* ItemInstance = nullptr;
 	
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_ItemState)
 		TEnumAsByte<EItemState> ItemState = EItemState::None;
 
-	UPROPERTY()
+	UFUNCTION()
+		void OnRep_ItemState();
+
+	UPROPERTY(EditDefaultsOnly)
 		USphereComponent* SphereComponent = nullptr;
 
 	UFUNCTION()
 		void OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SpeepResult);
 
-
-	FGameplayTag OverlapEventTag;
 
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<UStaticItemData> StaticItemDataClass;

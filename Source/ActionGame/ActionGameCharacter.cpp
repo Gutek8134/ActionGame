@@ -227,6 +227,10 @@ void AActionGameCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AActionGameCharacter::SprintActionStarted);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed , this, &AActionGameCharacter::SprintActionStopped);
 
+		//Inventory
+		EnhancedInputComponent->BindAction(DropItemAction, ETriggerEvent::Triggered, this, &AActionGameCharacter::DropItem);
+		EnhancedInputComponent->BindAction(EquipNextAction, ETriggerEvent::Triggered, this, &AActionGameCharacter::EquipNextItem);
+		EnhancedInputComponent->BindAction(UnequipAction, ETriggerEvent::Triggered, this, &AActionGameCharacter::UnequipItem);
 	}
 
 }
@@ -341,6 +345,30 @@ void AActionGameCharacter::SprintActionStopped(const FInputActionValue& Value)
 	if (AbilitySystemComponent) {
 		AbilitySystemComponent->CancelAbilities(&SprintTags);
 	}
+}
+
+void AActionGameCharacter::DropItem(const FInputActionValue& Value)
+{
+	FGameplayEventData EventPayload;
+	EventPayload.EventTag = UInventoryComponent::DropItemTag;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, UInventoryComponent::DropItemTag, EventPayload);
+}
+
+void AActionGameCharacter::EquipNextItem(const FInputActionValue& Value)
+{
+	FGameplayEventData EventPayload;
+	EventPayload.EventTag = UInventoryComponent::EquipNextTag;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, UInventoryComponent::EquipNextTag, EventPayload);
+}
+
+void AActionGameCharacter::UnequipItem(const FInputActionValue& Value)
+{
+	FGameplayEventData EventPayload;
+	EventPayload.EventTag = UInventoryComponent::UnequipTag;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, UInventoryComponent::UnequipTag, EventPayload);
 }
 
 

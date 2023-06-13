@@ -4,6 +4,7 @@
 #include "Actors/ItemActor.h"
 #include "Inventory/InventoryItemInstance.h"
 #include "Engine/ActorChannel.h"
+#include "ActorComponents/InventoryComponent.h"
 
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -15,7 +16,7 @@ AItemActor::AItemActor()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
-	SetReplicatedMovement(true);
+	SetReplicateMovement(true);
 
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
 	SphereComponent->SetupAttachment(RootComponent);
@@ -27,12 +28,37 @@ void AItemActor::Init(UInventoryItemInstance* InInstance)
 	ItemInstance = InInstance;
 }
 
+void AItemActor::OnRep_ItemState()
+{
+	switch (ItemState) {
+	case EItemState::Equipped:
+		SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SphereComponent->SetGenerateOverlapEvents(false);
+		break;
+
+	case EItemState::None:
+		SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SphereComponent->SetGenerateOverlapEvents(false);
+		break;
+
+	case EItemState::Dropped:
+		SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		SphereComponent->SetGenerateOverlapEvents(true);
+		break;
+
+	}
+}
+
 void AItemActor::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SpeepResult)
 {
-	FGameplayEventData EventPayload;
-	EventPayload.OptionalObject = this;
+	if (HasAuthority()) {
+		FGameplayEventData EventPayload;
+		EventPayload.Instigator = this;
+		EventPayload.OptionalObject = ItemInstance;
+		EventPayload.EventTag = UInventoryComponent::EquipItemActorTag;
 
-	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OtherActor, OverlapEventTag, EventPayload);
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(OtherActor, UInventoryComponent::EquipItemActorTag, EventPayload);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -44,11 +70,11 @@ void AItemActor::BeginPlay()
 		if (!IsValid(ItemInstance) && IsValid(StaticItemDataClass)) {
 			ItemInstance = NewObject<UInventoryItemInstance>();
 			ItemInstance->Init(StaticItemDataClass);
+
+			SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			SphereComponent->SetGenerateOverlapEvents(true);
 		}
 	}
-
-	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	SphereComponent->SetGenerateOverlapEvents(true);
 }
 
 // Called every frame

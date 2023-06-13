@@ -45,7 +45,7 @@ void UInventoryItemInstance::OnEquipped(AActor* InOwner)
 
 	}
 
-	bEquiped = true;
+	bEquipped = true;
 }
 
 void UInventoryItemInstance::OnUnequipped()
