@@ -4,6 +4,8 @@
 #include "Inventory/InventoryItemInstance.h"
 #include "ActionGameStatics.h"
 #include "GameFramework/Character.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 void UInventoryItemInstance::Init(TSubclassOf<UStaticItemData> InItemDataClass) {
@@ -45,24 +47,29 @@ void UInventoryItemInstance::OnEquipped(AActor* InOwner)
 
 	}
 
+	TryGrantAbilities(InOwner);
 	bEquipped = true;
 }
 
-void UInventoryItemInstance::OnUnequipped()
+void UInventoryItemInstance::OnUnequipped(AActor* InOwner)
 {
 	if (IsValid(ItemActor)) {
 		ItemActor->Destroy();
 		ItemActor = nullptr;
 	}
 
+	TryRemoveAbilities(InOwner);
 	bEquipped = false;
 }
 
-void UInventoryItemInstance::OnDropped()
+void UInventoryItemInstance::OnDropped(AActor* InOwner)
 {
 	if (ItemActor) {
 		ItemActor->OnDropped();
 	}
+
+	TryRemoveAbilities(InOwner);
+	bEquipped = false;
 }
 
 void UInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
@@ -71,4 +78,32 @@ void UInventoryItemInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	DOREPLIFETIME(UInventoryItemInstance, StaticItemDataClass);
 	DOREPLIFETIME(UInventoryItemInstance, bEquipped);
 	DOREPLIFETIME(UInventoryItemInstance, ItemActor);
+}
+
+void UInventoryItemInstance::TryGrantAbilities(AActor* InOwner)
+{
+	if (InOwner && InOwner->HasAuthority()) {
+		if (UAbilitySystemComponent* AbilityComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner)) {
+			const UStaticItemData* StaticData = GetItemStaticData();
+
+			for (const auto& ItemAbility : StaticData->GrantedAbilities) {
+				GrantedAbilityHandles.Add(AbilityComponent->GiveAbility(FGameplayAbilitySpec(ItemAbility)));
+			}
+		}
+	}
+}
+
+void UInventoryItemInstance::TryRemoveAbilities(AActor* InOwner)
+{
+	if (InOwner && InOwner->HasAuthority()) {
+		if (UAbilitySystemComponent* AbilityComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner)) {
+			const UStaticItemData* StaticData = GetItemStaticData();
+
+			for (const auto& ItemAbility : GrantedAbilityHandles) {
+				AbilityComponent->ClearAbility(ItemAbility);
+			}
+
+			GrantedAbilityHandles.Empty();
+		}
+	}
 }

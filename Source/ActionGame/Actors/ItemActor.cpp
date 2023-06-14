@@ -28,6 +28,12 @@ void AItemActor::Init(UInventoryItemInstance* InInstance)
 	ItemInstance = InInstance;
 }
 
+void AItemActor::OnRep_ItemInstance(UInventoryItemInstance* InItemInstance)
+{
+	if (IsValid(InItemInstance) && !IsValid(ItemInstance))
+		InitInternal();
+}
+
 void AItemActor::OnRep_ItemState()
 {
 	switch (ItemState) {
@@ -61,6 +67,10 @@ void AItemActor::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	}
 }
 
+void AItemActor::InitInternal()
+{
+}
+
 // Called when the game starts or when spawned
 void AItemActor::BeginPlay()
 {
@@ -73,6 +83,8 @@ void AItemActor::BeginPlay()
 
 			SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			SphereComponent->SetGenerateOverlapEvents(true);
+
+			InitInternal();
 		}
 	}
 }

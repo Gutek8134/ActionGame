@@ -6,6 +6,8 @@
 #include "Animation/AnimInstance.h"
 #include "AG_AnimInstance.generated.h"
 
+class UStaticItemData;
+
 /**
  * 
  */
@@ -30,5 +32,7 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Animation")
 		class UCharacterAnimDataAsset* DefaultCharacterAnimDataAsset;
+
+	const UStaticItemData* GetEquippedItemData() const;
 
 };

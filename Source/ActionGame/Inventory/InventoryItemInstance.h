@@ -36,14 +36,21 @@ public:
 
 	virtual void OnEquipped(AActor* InOwner = nullptr);
 
-	virtual void OnUnequipped();
+	virtual void OnUnequipped(AActor* InOwner = nullptr);
 
-	virtual void OnDropped();
+	virtual void OnDropped(AActor* InOwner = nullptr);
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
 protected:
 	UPROPERTY(Replicated)
 		AItemActor* ItemActor = nullptr;
+
+	void TryGrantAbilities(AActor* InOwner);
+
+	void TryRemoveAbilities(AActor* InOwner);
+
+	UPROPERTY()
+		TArray<FGameplayAbilitySpecHandle> GrantedAbilityHandles;
 };
 

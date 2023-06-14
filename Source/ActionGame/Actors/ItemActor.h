@@ -7,6 +7,8 @@
 #include "Components/SphereComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "ActionGameTypes.h"
+#include "Abilities/GameplayAbilityTypes.h"
+
 #include "ItemActor.generated.h"
 
 class UInventoryItemInstance;
@@ -41,11 +43,14 @@ public:
 	void Init(UInventoryItemInstance* InInstance);
 
 protected:
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_ItemInstance)
 		UInventoryItemInstance* ItemInstance = nullptr;
 	
 	UPROPERTY(ReplicatedUsing = OnRep_ItemState)
 		TEnumAsByte<EItemState> ItemState = EItemState::None;
+
+	UFUNCTION()
+		void OnRep_ItemInstance(UInventoryItemInstance* InItemInstance);
 
 	UFUNCTION()
 		void OnRep_ItemState();
@@ -59,4 +64,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 		TSubclassOf<UStaticItemData> StaticItemDataClass;
+
+	virtual void InitInternal();
 };

@@ -6,6 +6,8 @@
 #include "ActionGameTypes.generated.h"
 
 class AItemActor;
+class UGameplayAbility;
+class UGameplayEffect;
 
 USTRUCT(BlueprintType)
 struct FCharacterData {
@@ -62,6 +64,28 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		bool bCanBeEquipped = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		FCharacterAnimationData CharacterAnimationData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		TArray<TSubclassOf<UGameplayAbility>> GrantedAbilities;
+};
+
+UCLASS(BlueprintType, Blueprintable)
+class UStaticWeaponData : public UStaticItemData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		TSubclassOf<UGameplayEffect> DamageEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		USkeletalMesh* SkeletalMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		UStaticMesh* StaticMesh;
 };
 
 UENUM(BlueprintType)

@@ -78,6 +78,8 @@ public:
 
 	FORCEINLINE UAG_MotionWarpingComponent* GetAGMotionWarpingComponent() const { return AGMotionWarpingComponent; }
 
+	FORCEINLINE UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
+
 
 protected:
 

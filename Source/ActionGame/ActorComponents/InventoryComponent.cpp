@@ -140,7 +140,7 @@ void UInventoryComponent::UnequipItem()
 {
 	if (GetOwner()->HasAuthority()) {
 		if (IsValid(CurrentItem)) {
-			CurrentItem->OnUnequipped();
+			CurrentItem->OnUnequipped(GetOwner());
 			CurrentItem = nullptr;
 		}
 	}
@@ -150,7 +150,7 @@ void UInventoryComponent::DropItem()
 {
 	if (GetOwner()->HasAuthority()) {
 		if (IsValid(CurrentItem)) {
-			CurrentItem->OnDropped();
+			CurrentItem->OnDropped(GetOwner());
 			RemoveItem(CurrentItem->StaticItemDataClass);
 			CurrentItem = nullptr;
 		}
