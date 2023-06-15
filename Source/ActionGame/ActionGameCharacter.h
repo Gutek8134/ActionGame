@@ -66,6 +66,10 @@ class AActionGameCharacter : public ACharacter, public IAbilitySystemInterface
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* UnequipAction;
+	
+	//Attacking with items
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* AttackAction;
 
 public:
 	AActionGameCharacter(const FObjectInitializer& ObjectInitializer);
@@ -136,6 +140,11 @@ protected:
 	
 	void UnequipItem(const FInputActionValue& Value);
 
+	/** Called for attacking with items*/
+	void AttackStarted(const FInputActionValue& Value);
+
+	void AttackEnded(const FInputActionValue& Value);
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -185,6 +194,12 @@ protected:
 protected:
 	UPROPERTY(EditDefaultsOnly)
 		FGameplayTag JumpEventTag;
+	
+	UPROPERTY(EditDefaultsOnly)
+		FGameplayTag AttackStartedEventTag;
+	
+	UPROPERTY(EditDefaultsOnly)
+		FGameplayTag AttackEndedEventTag;
 
 
 // Gameplay Tags

@@ -19,6 +19,9 @@ public:
 
 	const UStaticWeaponData* GetStaticWeaponData() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		FVector GetMuzzleLocation() const;
+
 protected:
 	UPROPERTY()
 		UMeshComponent* MeshComponent = nullptr;

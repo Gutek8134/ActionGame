@@ -17,6 +17,11 @@ const UStaticItemData* UInventoryItemInstance::GetItemStaticData() const
 	return UActionGameStatics::GetItemStaticData(StaticItemDataClass);
 }
 
+AItemActor* UInventoryItemInstance::GetItemActor() const
+{
+	return ItemActor;
+}
+
 void UInventoryItemInstance::OnRep_Equipped()
 {
 }
