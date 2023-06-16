@@ -4,8 +4,11 @@
 #include "Inventory/InventoryItemInstance.h"
 #include "ActionGameStatics.h"
 #include "GameFramework/Character.h"
+
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemLog.h"
+
 #include "Net/UnrealNetwork.h"
 
 void UInventoryItemInstance::Init(TSubclassOf<UStaticItemData> InItemDataClass) {
@@ -53,6 +56,7 @@ void UInventoryItemInstance::OnEquipped(AActor* InOwner)
 	}
 
 	TryGrantAbilities(InOwner);
+	TryApplyEffects(InOwner);
 	bEquipped = true;
 }
 
@@ -64,6 +68,7 @@ void UInventoryItemInstance::OnUnequipped(AActor* InOwner)
 	}
 
 	TryRemoveAbilities(InOwner);
+	TryRemoveEffects(InOwner);
 	bEquipped = false;
 }
 
@@ -74,6 +79,7 @@ void UInventoryItemInstance::OnDropped(AActor* InOwner)
 	}
 
 	TryRemoveAbilities(InOwner);
+	TryRemoveEffects(InOwner);
 	bEquipped = false;
 }
 
@@ -111,4 +117,43 @@ void UInventoryItemInstance::TryRemoveAbilities(AActor* InOwner)
 			GrantedAbilityHandles.Empty();
 		}
 	}
+}
+
+void UInventoryItemInstance::TryApplyEffects(AActor* InOwner)
+{
+	if (UAbilitySystemComponent* AbilityComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner))
+	{
+
+		const UStaticItemData* ItemStaticData = GetItemStaticData();
+		FGameplayEffectContextHandle EffectContext = AbilityComponent->MakeEffectContext();
+
+		for (const auto& GameplayEffect : ItemStaticData->OngoingEffects) {
+			if (!GameplayEffect.Get()) continue;
+
+			FGameplayEffectSpecHandle SpecHandle = AbilityComponent->MakeOutgoingSpec(GameplayEffect, 1, EffectContext);
+
+			if (SpecHandle.IsValid()) {
+				FActiveGameplayEffectHandle ActiveGEHandle = AbilityComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+				if (!ActiveGEHandle.WasSuccessfullyApplied()) {
+					ABILITY_LOG(Log, TEXT("Item %s failed to apply runtime effect %s"), *GetName(), *GetNameSafe(GameplayEffect));
+				}
+				else {
+					OngoingEffectHandles.Add(ActiveGEHandle);
+				}
+			}
+		}
+	}
+}
+
+void UInventoryItemInstance::TryRemoveEffects(AActor* InOwner)
+{
+	if (UAbilitySystemComponent* AbilityComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InOwner)) {
+		for (const auto& OngoingEffectHandle : OngoingEffectHandles) {
+			if (OngoingEffectHandle.IsValid()) {
+				AbilityComponent->RemoveActiveGameplayEffect(OngoingEffectHandle);
+			}
+		}
+	}
+
+	OngoingEffectHandles.Empty();
 }

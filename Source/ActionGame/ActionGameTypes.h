@@ -71,6 +71,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		TArray<TSubclassOf<UGameplayAbility>> GrantedAbilities;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		TArray<TSubclassOf<UGameplayEffect>> OngoingEffects;
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -90,6 +93,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 		UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+		float FireRate;
 };
 
 UENUM(BlueprintType)
@@ -97,4 +103,11 @@ enum EItemState {
 	None UMETA(Displayname = "None"),
 	Equipped UMETA(Displayname = "Equipped"),
 	Dropped UMETA(Displayname = "Dropped"),
+};
+
+UENUM(BlueprintType)
+enum class EMovementDirectionType : uint8 {
+	None UMETA(DisplayName = "None"),
+	OrientToMovement UMETA(DisplayName = "Orient To Movement"),
+	Strafe UMETA(DisplayName = "Strafe"),
 };
