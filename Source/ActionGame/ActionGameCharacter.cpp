@@ -88,9 +88,9 @@ AActionGameCharacter::AActionGameCharacter(const FObjectInitializer& ObjectIniti
 	InventoryComponent->SetIsReplicated(true);
 }
 
-void AActionGameCharacter::PostInitializeComponents()
+void AActionGameCharacter::PostLoad()
 {
-	Super::PostInitializeComponents();
+	Super::PostLoad();
 
 	if (IsValid(CharacterDataAsset)) {
 		SetCharacterData(CharacterDataAsset->CharacterData);

@@ -74,7 +74,7 @@ class AActionGameCharacter : public ACharacter, public IAbilitySystemInterface
 public:
 	AActionGameCharacter(const FObjectInitializer& ObjectInitializer);
 
-	virtual void PostInitializeComponents() override;
+	virtual void PostLoad() override;
 
 	bool ApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> Effect, FGameplayEffectContextHandle InEffectContext);
 
