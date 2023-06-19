@@ -6,6 +6,7 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "AG_PhysicalMaterial.generated.h"
 
+class UNiagaraSystem;
 /**
  *
  */
@@ -17,4 +18,10 @@ class ACTIONGAME_API UAG_PhysicalMaterial : public UPhysicalMaterial
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalMaterial")
 		class USoundBase* FootstepSound = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalMaterial")
+		class USoundBase* PointImpactSound = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalMaterial")
+		UNiagaraSystem* PointImpactVFX = nullptr;
 };

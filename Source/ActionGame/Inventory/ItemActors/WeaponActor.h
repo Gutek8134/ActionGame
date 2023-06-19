@@ -7,7 +7,7 @@
 #include "WeaponActor.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class ACTIONGAME_API AWeaponActor : public AItemActor
@@ -22,9 +22,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		FVector GetMuzzleLocation() const;
 
+	UFUNCTION(BlueprintCallable)
+		void PlayWeaponEffects(const FHitResult& InHitResult);
+
 protected:
 	UPROPERTY()
 		UMeshComponent* MeshComponent = nullptr;
 
 	virtual void InitInternal() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastPlayWeaponEffects(const FHitResult& InHitResult);
+
+	void InternalPlayWeaponEffects(const FHitResult& InHitResult);
 };
