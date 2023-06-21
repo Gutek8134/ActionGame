@@ -24,7 +24,7 @@ FVector AWeaponActor::GetMuzzleLocation() const
 
 void AWeaponActor::PlayWeaponEffects(const FHitResult& InHitResult)
 {
-	if (!HasAuthority()) {
+	if (HasAuthority()) {
 		MulticastPlayWeaponEffects(InHitResult);
 	}
 	else
@@ -60,7 +60,7 @@ void AWeaponActor::InitInternal()
 
 void AWeaponActor::MulticastPlayWeaponEffects_Implementation(const FHitResult& InHitResult)
 {
-	if (!Owner || Owner->GetLocalRole() != ROLE_Authority)
+	if (!Owner || Owner->GetLocalRole() != ROLE_AutonomousProxy)
 		InternalPlayWeaponEffects(InHitResult);
 
 
