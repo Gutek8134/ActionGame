@@ -3,6 +3,7 @@
 #include "ActionGameGameMode.h"
 #include "ActionGameCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "PlayerControllers/ActionGamePlayerController.h"
 
 AActionGameGameMode::AActionGameGameMode()
 {
@@ -11,5 +12,14 @@ AActionGameGameMode::AActionGameGameMode()
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
+	}
+
+	PlayerControllerClass = AActionGamePlayerController::StaticClass();
+}
+
+void AActionGameGameMode::NotifyPlayerDied(AActionGamePlayerController* PlayerController)
+{
+	if (PlayerController) {
+		PlayerController->RestartPlayerIn(2.f);
 	}
 }

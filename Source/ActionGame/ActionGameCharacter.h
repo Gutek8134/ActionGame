@@ -177,6 +177,8 @@ public:
 
 	void OnMaxMovementSpeedChanged(const FOnAttributeChangeData& Data);
 
+	void OnHealthAttributeChanged(const FOnAttributeChangeData& Data);
+
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_CharacterData)
 		FCharacterData CharacterData;
@@ -197,6 +199,14 @@ protected:
 	UPROPERTY(EditAnywhere, Replicated)
 		class UInventoryComponent* InventoryComponent;
 
+//Life and death
+public:
+	void StartRagdoll();
+
+protected:
+	UFUNCTION()
+		void OnRagdollTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+
 // Gameplay Events
 protected:
 	UPROPERTY(EditDefaultsOnly)
@@ -213,6 +223,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 		FGameplayTag AimEndedEventTag;
+	
+	UPROPERTY(EditDefaultsOnly)
+		FGameplayTag ZeroHealthEventTag;
 
 
 // Gameplay Tags
@@ -225,6 +238,10 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 		FGameplayTagContainer SprintTags;
+
+	UPROPERTY(EditDefaultsOnly)
+		FGameplayTagContainer RagdollStateTags;
+
 
 
 // Gameplay Effects

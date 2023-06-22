@@ -15,6 +15,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/AttributeSets/AG_AttributeSetBase.h"
 #include "AbilitySystem/Components/AG_AbilitySystemComponentBase.h"
+#include "GameplayEffectExtension.h"
 #include "DataAssets/CharacterDataAsset.h"
 
 #include "ActorComponents/FootstepsComponent.h"
@@ -79,6 +80,10 @@ AActionGameCharacter::AActionGameCharacter(const FObjectInitializer& ObjectIniti
 	AttributeSet = CreateDefaultSubobject<UAG_AttributeSetBase>(TEXT("AttributeSet"));
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetMaxMovementSpeedAttribute()).AddUObject(this, &AActionGameCharacter::OnMaxMovementSpeedChanged);
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetHealthAttribute()).AddUObject(this, &AActionGameCharacter::OnHealthAttributeChanged);
+
+	AbilitySystemComponent->RegisterGameplayTagEvent(FGameplayTag::RequestGameplayTag(L"State.Ragdoll"), EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AActionGameCharacter::OnRagdollTagChanged);
 
 	FootstepsComponent = CreateDefaultSubobject<UFootstepsComponent>(TEXT("Footsteps Component"));
 	
@@ -186,6 +191,22 @@ void AActionGameCharacter::OnMaxMovementSpeedChanged(const FOnAttributeChangeDat
 	GetCharacterMovement()->MaxWalkSpeed = Data.NewValue;
 }
 
+void AActionGameCharacter::OnHealthAttributeChanged(const FOnAttributeChangeData& Data)
+{
+	if (Data.NewValue <= 0 && Data.OldValue > 0) {
+		AActionGameCharacter* OtherCharacter = nullptr;
+		if (Data.GEModData) {
+			const FGameplayEffectContextHandle& EffectContext = Data.GEModData->EffectSpec.GetEffectContext();
+			OtherCharacter = Cast<AActionGameCharacter>(EffectContext.GetInstigator());
+		}
+
+		FGameplayEventData EventPayload;
+		EventPayload.EventTag = ZeroHealthEventTag;
+
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, ZeroHealthEventTag, EventPayload);
+	}
+}
+
 void AActionGameCharacter::OnRep_CharacterData()
 {
 	InitFromCharacterData(CharacterData, true);
@@ -200,6 +221,26 @@ void AActionGameCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(AActionGameCharacter, CharacterData);
 	DOREPLIFETIME(AActionGameCharacter, InventoryComponent);
+}
+
+void AActionGameCharacter::StartRagdoll()
+{
+	USkeletalMeshComponent* SkeletalMesh = GetMesh();
+	if (SkeletalMesh && !SkeletalMesh->IsSimulatingPhysics()) {
+		SkeletalMesh->SetCollisionProfileName(L"Ragdoll");
+		SkeletalMesh->SetSimulatePhysics(true);
+		SkeletalMesh->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
+		SkeletalMesh->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+		SkeletalMesh->WakeAllRigidBodies();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AActionGameCharacter::OnRagdollTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	if (NewCount > 0) {
+		StartRagdoll();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
