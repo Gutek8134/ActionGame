@@ -18,5 +18,11 @@ class ACTIONGAME_API UActionGameStatics : public UBlueprintFunctionLibrary
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	static const UStaticItemData* GetItemStaticData(TSubclassOf<UStaticItemData> ItemDataClass);
+		static const UStaticItemData* GetItemStaticData(TSubclassOf<UStaticItemData> ItemDataClass);
+	
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+		static void ApplyRadialDamage(UObject* WorldContextObject, class AActor* DamageCauser, FVector Location, float Radius, float DamageAmount, TArray<TSubclassOf<class UGameplayEffect>> DamageEffects, const TArray<TEnumAsByte<EObjectTypeQuery>>& ObjectTypes, ETraceTypeQuery TraceType);
+	
+	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+		static class AProjectile* LaunchProjectile(UObject* WorldContextObject, TSubclassOf<UStaticProjectileData> ProjectileDataClass, FTransform Transform, AActor* Owner, AActor* Instigator);
 };
