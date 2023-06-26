@@ -84,7 +84,16 @@ void UActionGameStatics::ApplyRadialDamage(UObject* WorldContextObject, AActor* 
 	}
 }
 
-AProjectile* UActionGameStatics::LaunchProjectile(UObject* WorldContextObject, TSubclassOf<UStaticProjectileData> ProjectileDataClass, FTransform Transform, AActor* Owner, AActor* Instigator)
+AProjectile* UActionGameStatics::LaunchProjectile(UObject* WorldContextObject, TSubclassOf<UStaticProjectileData> ProjectileDataClass, FTransform Transform, AActor* Owner, APawn* Instigator)
 {
+	UWorld* World = WorldContextObject ? WorldContextObject->GetWorld() : nullptr;
+	if (World && World->IsServer()) {
+		if (AProjectile* Projectile = World->SpawnActorDeferred<AProjectile>(AProjectile::StaticClass(), Transform, Owner, Instigator, ESpawnActorCollisionHandlingMethod::AlwaysSpawn)) {
+			Projectile->ProjectileDataClass = ProjectileDataClass;
+			Projectile->FinishSpawning(Transform);
+
+			return Projectile;
+		}
+	}
 	return nullptr;
 }

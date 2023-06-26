@@ -109,7 +109,9 @@ void AProjectile::OnProjectileStop(const FHitResult& ImpactResult)
 {
  
 	const UStaticProjectileData* ProjectileData = GetProjectileData();
-	if(ProjectileData){}
+	if(ProjectileData){
+		UActionGameStatics::ApplyRadialDamage(this, GetOwner(), GetActorLocation(), ProjectileData->DamageRadius, ProjectileData->BaseDamage, ProjectileData->Effects, ProjectileData->RadialDamageQueryTypes, ProjectileData->RadialDamageTraceType);
+	}
 	Destroy();
 }
 
